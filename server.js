@@ -7,9 +7,9 @@ const FormData = require("form-data");
 const { Readable } = require("stream"); // Import Readable from the stream module
 const fs = require("fs");
 const path = require("path");
-const JWT =
-  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI1ZDc1NjFjYy04ODA4LTQ1MzYtOWE0Yy1lMzUyN2ZkN2E4MzYiLCJlbWFpbCI6Imxldmltb3JpbjExQG91dGxvb2suY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siaWQiOiJGUkExIiwiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjF9LHsiaWQiOiJOWUMxIiwiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjF9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6ImYxMDJmYzJkN2ZhMDIwOTE2NjkwIiwic2NvcGVkS2V5U2VjcmV0IjoiOWNlMDRkY2MyODg5MTZmNmRkYWY4MGI0NjI5MzIyOGU0MGNiMGYzM2M1NmNiYTRiZjRlNWNiYjFmZWQwZDA0ZiIsImlhdCI6MTY5MDEzMjk1NH0.YJ_Z51QRjVLy31XVw9SVtT3FK3h_hdTmlG8J0LRQSg0";
+const JWT = `Bearer ${process.env.PINATA_JWT}`;
 const app = express();
+require("dotenv").config();
 app.use(cors());
 
 // Middleware to parse incoming request bodies (for JSON and form data)
@@ -73,13 +73,17 @@ app.post("/api/", async (req, res) => {
           formData.append("pinataOptions", options);
 
           try {
-            const response = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
-              maxBodyLength: "Infinity",
-              headers: {
-                "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
-                Authorization: JWT,
-              },
-            });
+            const response = await axios.post(
+              "https://api.pinata.cloud/pinning/pinFileToIPFS",
+              formData,
+              {
+                maxBodyLength: "Infinity",
+                headers: {
+                  "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
+                  Authorization: JWT,
+                },
+              }
+            );
             console.log(response.data);
 
             const nftJson = JSON.parse(nftMetadata);
@@ -111,9 +115,14 @@ app.post("/api/", async (req, res) => {
 
             const resp = await axios(config);
 
-            return res
-              .status(200)
-              .json({ content: { upload: { metadata: nftMetadata, url: `ipfs://${resp.data.IpfsHash}` } } });
+            return res.status(200).json({
+              content: {
+                upload: {
+                  metadata: nftMetadata,
+                  url: `ipfs://${resp.data.IpfsHash}`,
+                },
+              },
+            });
           } catch (error) {
             console.log(error);
           }
@@ -136,7 +145,7 @@ app.post("/api/", async (req, res) => {
 });
 
 // Start the server on a specified port
-const port = 5000; // You can change this to any port number you want
+const port = process.env.PORT || 5000; // You can change this to any port number you want
 app.listen(port, () => {
   console.log(`Server is running on port ${port}.`);
 });
