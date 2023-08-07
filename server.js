@@ -7,9 +7,9 @@ const FormData = require("form-data");
 const { Readable } = require("stream"); // Import Readable from the stream module
 const fs = require("fs");
 const path = require("path");
+require("dotenv").config();
 const JWT = `Bearer ${process.env.PINATA_JWT}`;
 const app = express();
-require("dotenv").config();
 app.use(cors());
 
 // Middleware to parse incoming request bodies (for JSON and form data)
